@@ -237,7 +237,7 @@ function checkModified(deviceId, dp) {
 		}
 
 		c = cache[deviceId];
-		if( Math.abs(Timestamp.secondsFromTimestamp(dp.timestamp) - Timestamp.secondsFromTimestamp(c.timestamp)) > 300 ) {
+		if( Math.abs(Timestamp.parseSeconds(dp.timestamp) - Timestamp.parseSeconds(c.timestamp)) > 300 ) {
 			dbgout('timeout, renew entry after 300 seconds');
 			modified = true;
 		}
@@ -292,7 +292,7 @@ function checkModified(deviceId, dp) {
 			dbgout('could not write cache file')
 		}
 	} else {
-		dbgout('state not modified since last check ' + (c ? Timestamp.dateFromTimestamp(c.timestamp) : null));
+		dbgout('state not modified since last check ' + (c ? Timestamp.parseDate(c.timestamp) : null));
 	}
 	return modified;
 }
