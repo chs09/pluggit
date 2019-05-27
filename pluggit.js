@@ -1,4 +1,5 @@
-"use strict";
+/* eslint-disable no-console */
+'use strict';
 
 const FileSystem = require('fs');
 
@@ -13,7 +14,7 @@ const FC = Modbus.FUNCTION_CODES;
 if(ModbusClient.RESPONSES[3] === undefined)
 	ModbusClient.RESPONSES[3] = ModbusClient.RESPONSES[4];
 
-const Timestamp = require('./timestamp')
+const Timestamp = require('./timestamp');
 
 /* common code */
 console.log('adapter pluggit: reading settings');
@@ -23,17 +24,17 @@ var settings = require(__dirname + '/settings.json');
 var debug = settings.debug;
 
 function stop() {
-    dbgout("adapter pluggit: terminating");
-    setTimeout( process.exit, 250 );
+	dbgout('adapter pluggit: terminating');
+	setTimeout( process.exit, 250 );
 }
 
 process.on('SIGINT', stop);
 process.on('SIGTERM', stop);
 
 function dbgout(log) {
-    if (debug) {
-        console.log(log);
-    }
+	if (debug) {
+		console.log(log);
+	}
 }
 
 let client;
@@ -45,13 +46,13 @@ async function main() {
 	// IP and port of the MODBUS slave, default port is 502
 	client = ModbusClient.createClient(settings.pluggit.port, settings.pluggit.host);
 	client.setTimeout(3000, () => {
-		dbgout('socket idle timeout')
+		dbgout('socket idle timeout');
 	});
 
 	try {
 		await requestBlock(0, dp);
 	} catch (err) {
-		console.error(err)
+		console.error(err);
 		return stop();
 	} finally {
 		client.end();
@@ -104,7 +105,7 @@ const ALARMS = { // 40517 prmLastActiveAlarm
 	13: 'Communication Alarm',
 	14: 'FireTermostat Alarm',
 	15: 'VOC Alarm'
-}
+};
 
 const STATES = { // 40473 prmCurrentBLState
 	0: 'Standby',
@@ -124,100 +125,100 @@ const STATES = { // 40473 prmCurrentBLState
 	14: 'Defrost Off',
 	15: 'Defrost',
 	16: 'Night'
-}
+};
 
 /* request modbus data block */
 async function requestBlock(blockindex, dp)
 {
 	let buf;
 	switch (blockindex) {
-		case 0: // 40003 prmSystemID, 40005-40007 prmSystemSerialNum, 40009-40023 prmSystemName
-			buf = await readBlock(2, 23);
-			dp['serial'] = buf.readUInt32LE(4) + (buf.readUInt32LE(8) << 32);
-			dp['name'] = buf.toString('utf-8', 12, 32).replace(/\0/g, '');
-			dp['version'] = buf.readUInt8(45) + '.' + buf.readUInt8(44);
-			dbgout(`sn: ${dp['serial']}, name: ${dp['name']}, fw: ${dp['version']}\r\n`);
-			break;
+	case 0: // 40003 prmSystemID, 40005-40007 prmSystemSerialNum, 40009-40023 prmSystemName
+		buf = await readBlock(2, 23);
+		dp['serial'] = buf.readUInt32LE(4) + (buf.readUInt32LE(8) << 32);
+		dp['name'] = buf.toString('utf-8', 12, 32).replace(/\0/g, '');
+		dp['version'] = buf.readUInt8(45) + '.' + buf.readUInt8(44);
+		dbgout(`sn: ${dp['serial']}, name: ${dp['name']}, fw: ${dp['version']}\r\n`);
+		break;
 
-		case 1: // 40101 prmHALTaho1, 40103 prmHALTaho2
-			buf = await readBlock(100, 4);
-			dp['fan1'] = buf.readFloatLE(0).toFixed(1);
-			dp['fan2'] = buf.readFloatLE(4).toFixed(1);
-			dbgout(`fan1: ${dp['fan1']} rpm\, fan2: ${dp['fan2']} rpm\r\n`);
-			break;
+	case 1: // 40101 prmHALTaho1, 40103 prmHALTaho2
+		buf = await readBlock(100, 4);
+		dp['fan1'] = buf.readFloatLE(0).toFixed(1);
+		dp['fan2'] = buf.readFloatLE(4).toFixed(1);
+		dbgout(`fan1: ${dp['fan1']} rpm, fan2: ${dp['fan2']} rpm\r\n`);
+		break;
 
-		case 2: // 40133 prmRamIdxT1, 40135 prmRamIdxT2, 40137 prmRamIdxT3, 40139 prmRamIdxT4, 40141 prmRamIdxT5
-			buf = await readBlock(132, 20);
-			dp['t1'] = buf.readFloatLE(0).toFixed(2);
-			dp['t2'] = buf.readFloatLE(4).toFixed(2);
-			dp['t3'] = buf.readFloatLE(8).toFixed(2);
-			dp['t4'] = buf.readFloatLE(12).toFixed(2);
-			dp['t5'] = buf.readFloatLE(16).toFixed(2);
-			dbgout(`t1: ${dp['t1']} °C, t2: ${dp['t2']} °C, t3: ${dp['t3']} °C, t4: ${dp['t4']} °C, t5: ${dp['t5']} °C\r\n`);
-			break;
+	case 2: // 40133 prmRamIdxT1, 40135 prmRamIdxT2, 40137 prmRamIdxT3, 40139 prmRamIdxT4, 40141 prmRamIdxT5
+		buf = await readBlock(132, 20);
+		dp['t1'] = buf.readFloatLE(0).toFixed(2);
+		dp['t2'] = buf.readFloatLE(4).toFixed(2);
+		dp['t3'] = buf.readFloatLE(8).toFixed(2);
+		dp['t4'] = buf.readFloatLE(12).toFixed(2);
+		dp['t5'] = buf.readFloatLE(16).toFixed(2);
+		dbgout(`t1: ${dp['t1']} °C, t2: ${dp['t2']} °C, t3: ${dp['t3']} °C, t4: ${dp['t4']} °C, t5: ${dp['t5']} °C\r\n`);
+		break;
 
-		case 3: // 40197 prmRamIdxRh3Corrected, 40199 prmRamIdxBypassActualState
-			buf = await readBlock(196, 4);
-			dp['humidity'] = buf.readUInt32LE(0);
-			dp['bypass'] = buf.readUInt32LE(4);
-			switch (dp['bypass']) {
-				case 0x0000: dp['bypassState'] = 'closed'; break;
-				case 0x0001: dp['bypassState'] = 'in process'; break;
-				case 0x0020: dp['bypassState'] = 'closing'; break;
-				case 0x0040: dp['bypassState'] = 'opening'; break;
-				case 0x00FF: dp['bypassState'] = 'opened'; break;
-				default: dp['bypassState'] = 'unknown'; break;
-			}
-			dbgout(`RH: ${dp['humidity']}%\r\nBypass: ${dp['bypass']} (${dp['bypassState']})\r\n`);
-			break;
+	case 3: // 40197 prmRamIdxRh3Corrected, 40199 prmRamIdxBypassActualState
+		buf = await readBlock(196, 4);
+		dp['humidity'] = buf.readUInt32LE(0);
+		dp['bypass'] = buf.readUInt32LE(4);
+		switch (dp['bypass']) {
+		case 0x0000: dp['bypassState'] = 'closed'; break;
+		case 0x0001: dp['bypassState'] = 'in process'; break;
+		case 0x0020: dp['bypassState'] = 'closing'; break;
+		case 0x0040: dp['bypassState'] = 'opening'; break;
+		case 0x00FF: dp['bypassState'] = 'opened'; break;
+		default: dp['bypassState'] = 'unknown'; break;
+		}
+		dbgout(`RH: ${dp['humidity']}%\r\nBypass: ${dp['bypass']} (${dp['bypassState']})\r\n`);
+		break;
 
-		case 4: // 40325 prmRomIdxSpeedLevel
-			buf = await readBlock(324, 1);
-			dp['speed'] = buf.readUInt16LE(0);
-			dbgout(`speed: ${dp['speed']}\r\n`);
-			break;
+	case 4: // 40325 prmRomIdxSpeedLevel
+		buf = await readBlock(324, 1);
+		dp['speed'] = buf.readUInt16LE(0);
+		dbgout(`speed: ${dp['speed']}\r\n`);
+		break;
 
-		case 5: // 40473 prmCurrentBLState
-			buf = await readBlock(472, 1);
-			dp['state'] = buf.readUInt16LE(0);
-			dp['stateText'] = STATES[dp['state']] || 'unknown';
-			dbgout("state: " + dp['state'] + ' (' + dp['stateText'] + ')\r\n');
-			break;
+	case 5: // 40473 prmCurrentBLState
+		buf = await readBlock(472, 1);
+		dp['state'] = buf.readUInt16LE(0);
+		dp['stateText'] = STATES[dp['state']] || 'unknown';
+		dbgout('state: ' + dp['state'] + ' (' + dp['stateText'] + ')\r\n');
+		break;
 
-		case 6: // 40517 prmLastActiveAlarm
-			buf = await readBlock(516, 1);
-			dp['alarm'] = buf.readUInt16LE(0);
-			dp['alarmState'] = ALARMS[dp['alarm']] || 'unkown';
-			dbgout("alarm: " + dp['alarm'] + ' (' + dp['alarmState'] + ')\r\n');
-			break;
+	case 6: // 40517 prmLastActiveAlarm
+		buf = await readBlock(516, 1);
+		dp['alarm'] = buf.readUInt16LE(0);
+		dp['alarmState'] = ALARMS[dp['alarm']] || 'unkown';
+		dbgout('alarm: ' + dp['alarm'] + ' (' + dp['alarmState'] + ')\r\n');
+		break;
 
-		case 7: // 	40555 prmFilterRemainingTime (Remaining time of the Filter Lifetime (Days))
-			buf = await readBlock(554, 1);
-			dp['filterReset'] = buf.readUInt16LE(0);
-			dbgout("filter reset: " + dp['filterReset'] + ' days\r\n');
-			break;
+	case 7: // 	40555 prmFilterRemainingTime (Remaining time of the Filter Lifetime (Days))
+		buf = await readBlock(554, 1);
+		dp['filterReset'] = buf.readUInt16LE(0);
+		dbgout('filter reset: ' + dp['filterReset'] + ' days\r\n');
+		break;
 
-		case 8: // 	40625 prmWorkTime (Work time of system, in hours)
-			buf = await readBlock(624, 2);
-			dp['workTime'] = buf.readUInt32LE(0);
-			dbgout("work time: " + dp['workTime'] + ' hours\r\n');
-			break;
+	case 8: // 	40625 prmWorkTime (Work time of system, in hours)
+		buf = await readBlock(624, 2);
+		dp['workTime'] = buf.readUInt32LE(0);
+		dbgout('work time: ' + dp['workTime'] + ' hours\r\n');
+		break;
 
-		case 9:
-			dbgout(`last block requested ${blockindex}`);
-			dp['timestamp'] = Timestamp.now();
-			/* last block, do not iterate further */
-			return;
+	case 9:
+		dbgout(`last block requested ${blockindex}`);
+		dp['timestamp'] = Timestamp.now();
+		/* last block, do not iterate further */
+		return;
 
-		default:
-			/* should not happen */
-			dbgout('block index out of range')
-			return stop();
+	default:
+		/* should not happen */
+		dbgout('block index out of range')
+		return stop();
 	}
 
 	/* request next block be aware that this is a recursive call */
 	await requestBlock(++blockindex, dp);
-};
+}
 
 function checkModified(deviceId, dp) {
 	let cache;
@@ -280,7 +281,7 @@ function checkModified(deviceId, dp) {
 			}
 		}
 	} else {
-		dbgout(`no last value`);
+		dbgout('no last value');
 		modified = true;
 	}
 
@@ -289,7 +290,7 @@ function checkModified(deviceId, dp) {
 		try {
 			FileSystem.writeFileSync(__dirname+'/cache.json', JSON.stringify(cache));
 		} catch (err) {
-			dbgout('could not write cache file')
+			dbgout('could not write cache file');
 		}
 	} else {
 		dbgout('state not modified since last check ' + (c ? Timestamp.parseDate(c.timestamp) : null));
@@ -303,7 +304,7 @@ function storeDatabase(dp)
 	if(!checkModified(dp.serial, dp))
 		return;
 
-    /* is mysql adapter defined? */
+	/* is mysql adapter defined? */
 	if ((typeof settings.mysql) == 'undefined')
 		return;
 
@@ -317,10 +318,10 @@ function storeDatabase(dp)
 
 	connection.connect(function (err) {
 		if (err) {
-			dbgout("adapter pluggit can't connect to mysql-server " + err);
+			dbgout('adapter pluggit can\'t connect to mysql-server ' + err);
 			return stop();
 		}
-		dbgout("adapter pluggit connected to mysql-server on " + settings.mysql.host);
+		dbgout('adapter pluggit connected to mysql-server on ' + settings.mysql.host);
 	});
 
 	/* select database and insert data */
