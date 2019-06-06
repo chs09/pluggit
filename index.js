@@ -10,10 +10,9 @@ const Pluggit = require('./pluggit');
 let interval = Number.parseInt(settings.period);
 
 Pluggit.on('data', async (dp) => {
-	if(!checkModified(dp.serial, dp))
-		return;
+	if(checkModified(dp.serial, dp))
+		await storeDatabase(dp);
 
-	await storeDatabase(dp);
 	if(!interval) {
 		stop();
 	}

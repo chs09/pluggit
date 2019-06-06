@@ -86,7 +86,7 @@ function readBlock(start, len) {
 			for (var i=0; i<response.length; i++) {
 				buf.writeUInt16LE(response[i],i*2);
 			}
-			Logger.verbose(`block ${start},${len}: ${buf.toString('hex')}`);
+			Logger.debug(`block ${start},${len}: ${buf.toString('hex')}`);
 			resolve(buf);
 		});
 	});
