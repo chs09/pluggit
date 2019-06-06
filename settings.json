@@ -1,8 +1,6 @@
 ﻿{
-    "enabled": true,
     "mode": "periodical",
-    "period": 5000,
-    "firstId": 102000,
+    "period": 0,
     "debug": true,
     "pluggit":
     {

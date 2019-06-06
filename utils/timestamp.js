@@ -1,3 +1,5 @@
+// timestamp utils //
+'use strict';
 
 module.exports = {
 	now: function timestampNow() {

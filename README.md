@@ -14,10 +14,8 @@ The software uses the nodejs ModBus(R) stack which can be found here:
 
 settings.json
 ```json
-  "enabled": true,
   "mode": "periodical",
   "period": 60,
-  "firstId": 102000,
   "debug": false,
   "pluggit":
   {
@@ -33,11 +31,41 @@ settings.json
   }
 ```
 
-## pluggit.js
+## main.js
 main module
 - general initialization
 - read out pluggit values
 - store values in database
+
+## pluggit.js
+modbus connector module
+- read out pluggit values via modbus
+
+### Datapoints
+```json
+{  
+   "serial":1767847366,
+   "name":"Ventilation EG",
+   "version":"2.68",
+   "fan1":"1758.5",
+   "fan2":"2105.5",
+   "t1":"16.92",
+   "t2":"17.47",
+   "t3":"23.56",
+   "t4":"20.00",
+   "t5":"88.00",
+   "humidity":255,
+   "bypass":0,
+   "bypassState":"closed",
+   "speed":3,
+   "state":3,
+   "stateText":"Week program",
+   "alarm":0,
+   "alarmState":"None",
+   "filterReset":210,
+   "workTime":27575
+}
+```
 
 ## Database
 To create database use pluggit.sql
