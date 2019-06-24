@@ -60,12 +60,7 @@ function distance(v1, v2) {
 function checkModified(deviceId, dp) {
 	let c = Store.get(deviceId);
 	let modified = false;
-	if(c) {
-		if( Math.abs( Moment.unix(dp.timestamp) - Moment.unix(c.timestamp)) > 300 ) {
-			Logger.info('timeout, renew entry after 300 seconds');
-			modified = true;
-		}
-		
+	if(c) {		
 		if(!modified) {
 			let properties = ['t1', 't2', 't3', 't4', 't5'];
 			for(let i=0; i<properties.length; i++) {
@@ -103,6 +98,14 @@ function checkModified(deviceId, dp) {
 				}
 			}
 		}
+
+		if(!modified) {
+			let diff = Moment.unix(c.timestamp).diff(Moment.unix(dp.timestamp));
+			if( Math.abs( Moment.duration(diff).asSeconds() ) > 300 ) {
+				Logger.info('timeout, renew entry after 300 seconds');
+				modified = true;
+			}
+		}
 	} else {
 		Logger.debug('no last value');
 		modified = true;
@@ -111,7 +114,7 @@ function checkModified(deviceId, dp) {
 	if(modified) {
 		Store.set(deviceId, Object.assign({}, dp));
 	} else {
-		Logger.info('state not modified since last check ' + (c ? Moment.unix(c.timestamp) : null));
+		Logger.info('state not modified since last check ' + (c ? Moment.unix(c.timestamp).format('LLLL') : null));
 	}
 	return modified;
 }

@@ -174,7 +174,7 @@ async function requestBlock(blockindex, dp)
 		dp['humidity'] = buf.readUInt32LE(0);
 		dp['bypass'] = buf.readUInt32LE(4);
 		dp['bypassState'] = BYPASSSTATES[dp['bypass']] || 'unknown';
-		Logger.info(`RH: ${dp['humidity']}%\r\nBypass: ${dp['bypass']} (${dp['bypassState']})\r\n`);
+		Logger.info(`RH: ${dp['humidity']}%, Bypass: ${dp['bypass']} (${dp['bypassState']})\r\n`);
 		break;
 
 	case 4: // 40325 prmRomIdxSpeedLevel
@@ -197,13 +197,13 @@ async function requestBlock(blockindex, dp)
 		Logger.info('alarm: ' + dp['alarm'] + ' (' + dp['alarmState'] + ')\r\n');
 		break;
 
-	case 7: // 	40555 prmFilterRemainingTime (Remaining time of the Filter Lifetime (Days))
+	case 7: // 40555 prmFilterRemainingTime (Remaining time of the Filter Lifetime (Days))
 		buf = await readBlock(554, 1);
 		dp['filterReset'] = buf.readUInt16LE(0);
 		Logger.info('filter reset: ' + dp['filterReset'] + ' days\r\n');
 		break;
 
-	case 8: // 	40625 prmWorkTime (Work time of system, in hours)
+	case 8: // 40625 prmWorkTime (Work time of system, in hours)
 		buf = await readBlock(624, 2);
 		dp['workTime'] = buf.readUInt32LE(0);
 		Logger.info('work time: ' + dp['workTime'] + ' hours\r\n');
