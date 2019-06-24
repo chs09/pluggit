@@ -2,10 +2,18 @@
 
 const Logger = require('./utils/logger');
 const Store = require('./utils/datastore');
-const Timestamp = require('./utils/timestamp');
+const Moment = require('moment');
+const FileSystem = require('fs');
+const Path = require('path');
 
-var settings = require(__dirname + '/settings.json');
+let cfgfile = Path.join(__dirname, 'settings.json' );
+if(!FileSystem.existsSync(cfgfile)) {
+	process.stdout.write('Error: Config file "' + cfgfile + '" not found.\n');
+	process.stdout.write('To generate this file run:\n> node ./pluggit-config.js\n\n');
+	process.exit(2);
+}
 
+let settings = require(cfgfile);
 const Pluggit = require('./pluggit');
 let interval = Number.parseInt(settings.period);
 
@@ -53,7 +61,7 @@ function checkModified(deviceId, dp) {
 	let c = Store.get(deviceId);
 	let modified = false;
 	if(c) {
-		if( Math.abs(Timestamp.parseSeconds(dp.timestamp) - Timestamp.parseSeconds(c.timestamp)) > 300 ) {
+		if( Math.abs( Moment.unix(dp.timestamp) - Moment.unix(c.timestamp)) > 300 ) {
 			Logger.info('timeout, renew entry after 300 seconds');
 			modified = true;
 		}
@@ -103,7 +111,7 @@ function checkModified(deviceId, dp) {
 	if(modified) {
 		Store.set(deviceId, Object.assign({}, dp));
 	} else {
-		Logger.info('state not modified since last check ' + (c ? Timestamp.parseDate(c.timestamp) : null));
+		Logger.info('state not modified since last check ' + (c ? Moment.unix(c.timestamp) : null));
 	}
 	return modified;
 }

@@ -14,7 +14,7 @@ class PluggitEventEmitter extends EventEmitter {
 const events = new PluggitEventEmitter();
 module.exports = events;
 
-const Timestamp = require('./utils/timestamp');
+const Moment = require('moment');
 const Logger = require('./utils/logger');
 
 // The Buffer class is within the global scope, making it unlikely that one would need to ever use require('buffer').Buffer.
@@ -54,7 +54,7 @@ async function start() {
 	// IP and port of the MODBUS slave, default port is 502
 	client = ModbusClient.createClient(settings.pluggit.port, settings.pluggit.host);
 	client.setTimeout(10000, () => {
-		Logger.debug('socket timeout...');
+		Logger.error('socket timeout...');
 		stop();
 	});
 
@@ -211,7 +211,7 @@ async function requestBlock(blockindex, dp)
 
 	case 9:
 		Logger.info(`last block requested ${blockindex}`);
-		dp['timestamp'] = Timestamp.now();
+		dp['timestamp'] = Moment().unix();
 		/* last block, do not iterate further */
 		return;
 
