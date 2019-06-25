@@ -201,21 +201,20 @@ function storeDatabase(dp)
 		connection.query(sqlInsertAlarm);
 	}
 
-	return new Promise((resolve, reject) => {
-		findDeviceId()
-			.then((deviceId) => {
-				updateDeviceStats(deviceId);
-				insertDataRow(deviceId);
-				updateState(deviceId);
-				resolve(deviceId);
-			}, (err) => {
-				Logger.error('unable to find device id');
-				reject(err);
-				throw err;
-			})
-			.finally(() => {
-				/* close database */
-				connection.end();
-			});
+	return new Promise(async (resolve, reject) => {
+		try {
+			let deviceId = await findDeviceId();	
+
+			updateDeviceStats(deviceId);
+			insertDataRow(deviceId);
+			updateState(deviceId);
+			resolve(deviceId);
+		} catch (err) {
+			Logger.error('unable to update database ', err);
+			reject(err);
+		} finally {
+			/* close database */
+			connection.end();
+		}
 	});
 }
