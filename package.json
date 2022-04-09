@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "modbus-stack": "^0.2.1",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "mysql": "^2.18.1",
     "simple-node-logger": "^18.12.24"
   }
